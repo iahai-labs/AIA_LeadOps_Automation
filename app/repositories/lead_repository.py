@@ -16,6 +16,12 @@ def create(
     company: str | None,
     message: str,
     fingerprint: str,
+    service_type: str,
+    intent: str,
+    urgency: str,
+    qualification_summary: str,
+    language: str,
+    qualification_source: str,
 ) -> Lead:
     lead = Lead(
         name=name,
@@ -23,6 +29,12 @@ def create(
         company=company,
         message=message,
         fingerprint=fingerprint,
+        service_type=service_type,
+        intent=intent,
+        urgency=urgency,
+        qualification_summary=qualification_summary,
+        language=language,
+        qualification_source=qualification_source,
     )
     db.add(lead)
     db.commit()

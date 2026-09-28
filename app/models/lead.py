@@ -16,6 +16,14 @@ class Lead(Base):
     message: Mapped[str] = mapped_column(Text)
     fingerprint: Mapped[str] = mapped_column(String(64), unique=True, index=True)
     status: Mapped[str] = mapped_column(String(32), default="received")
+
+    service_type: Mapped[str] = mapped_column(String(64), default="unknown")
+    intent: Mapped[str] = mapped_column(String(16), default="unknown")
+    urgency: Mapped[str] = mapped_column(String(16), default="unknown")
+    qualification_summary: Mapped[str] = mapped_column(Text, default="")
+    language: Mapped[str] = mapped_column(String(16), default="unknown")
+    qualification_source: Mapped[str] = mapped_column(String(24), default="fallback")
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(UTC),

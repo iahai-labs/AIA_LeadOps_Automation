@@ -22,5 +22,7 @@ def test_create_lead_and_detect_duplicate() -> None:
     second = create_lead(db, payload)
 
     assert first.duplicate is False
+    assert first.qualification.source in {"ai", "fallback"}
     assert second.duplicate is True
     assert first.id == second.id
+    assert second.qualification.service_type == first.qualification.service_type

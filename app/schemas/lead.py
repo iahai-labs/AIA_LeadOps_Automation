@@ -8,7 +8,17 @@ class LeadCreate(BaseModel):
     message: str = Field(min_length=5, max_length=5000)
 
 
+class LeadQualification(BaseModel):
+    service_type: str
+    intent: str
+    urgency: str
+    summary: str
+    language: str
+    source: str
+
+
 class LeadResponse(BaseModel):
     id: int
     status: str
     duplicate: bool
+    qualification: LeadQualification
