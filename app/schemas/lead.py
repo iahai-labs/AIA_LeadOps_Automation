@@ -24,9 +24,17 @@ class LeadScoring(BaseModel):
     reasons: list[str]
 
 
+class LeadAutomation(BaseModel):
+    status: str
+    attempts: int = Field(ge=0)
+    followup_draft: str
+    last_error: str | None = None
+
+
 class LeadResponse(BaseModel):
     id: int
     status: str
     duplicate: bool
     qualification: LeadQualification
     scoring: LeadScoring
+    automation: LeadAutomation

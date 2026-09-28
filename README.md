@@ -2,7 +2,7 @@
 
 Production-minded AI lead operations and workflow automation for SMBs.
 
-## Current release: v0.3.0 — Explainable Lead Scoring
+## Current release: v0.4.0 — Automation Integrations
 
 ### Implemented
 - FastAPI lead intake API
@@ -10,71 +10,67 @@ Production-minded AI lead operations and workflow automation for SMBs.
 - duplicate detection
 - structured AI lead qualification
 - provider abstraction for OpenAI-compatible APIs
-- safe deterministic fallback when AI is unavailable
+- safe deterministic AI fallback
 - explainable deterministic lead scoring
 - hot / warm / cold lead tiers
-- recommended next action per lead
-- persisted scoring reasons for auditability
+- recommended next action
+- deterministic follow-up draft generation
+- outbound n8n webhook integration
+- optional webhook secret header
+- Telegram recommendation flag for hot leads
+- integration status / attempt / error persistence
 - pytest + Ruff
 - GitHub Actions CI
 - Dependabot
 - Docker Compose
 
-## Example qualification and scoring
+## Automation flow
 
-```json
-{
-  "qualification": {
-    "service_type": "website_development",
-    "intent": "high",
-    "urgency": "high",
-    "summary": "Dental clinic needs a website next month.",
-    "language": "en",
-    "source": "ai"
-  },
-  "scoring": {
-    "score": 100,
-    "tier": "hot",
-    "recommended_action": "Contact within 4 hours",
-    "reasons": [
-      "Intent 'high' contributed 40 points",
-      "Urgency 'high' contributed 25 points",
-      "Recognized service need contributed 15 points",
-      "Company information contributed 5 points",
-      "Detailed lead message contributed 5 points",
-      "Explicit timeline signal contributed 10 points"
-    ]
-  }
-}
+```text
+Lead API
+  -> AI qualification
+  -> deterministic scoring
+  -> follow-up draft
+  -> persist lead
+  -> n8n webhook
+  -> Telegram / CRM / email workflow
 ```
 
-## Why scoring is deterministic
+The application does not require n8n to accept leads. If no webhook is configured,
+automation delivery is marked as `skipped`. If delivery fails, lead creation remains
+successful and the integration result is stored for later inspection.
 
-The LLM extracts structured lead signals, but the business score is calculated by explicit
-rules. This keeps the score explainable, testable, and auditable instead of asking the
-model to invent an opaque number.
+## Webhook payload
 
-Current scoring signals:
-- intent
-- urgency
-- recognized service need
-- company information
-- message quality
-- explicit timeline signals
+The n8n webhook receives:
+- lead identity and message
+- structured qualification
+- explainable scoring
+- recommended action
+- follow-up draft
+- `telegram_recommended=true` for hot leads
 
-Scores are capped at 100.
+## Environment
 
-### Tiers
+```text
+N8N_WEBHOOK_URL=https://your-n8n.example/webhook/leadops
+N8N_WEBHOOK_SECRET=replace-with-a-secret
+AUTOMATION_TIMEOUT_SECONDS=5
+```
 
-- `hot` — score 75–100 — contact within 4 hours
-- `warm` — score 45–74 — contact within 1 business day
-- `cold` — score 0–44 — automated nurture follow-up
+When a secret is configured it is sent as:
+
+```text
+X-AIA-Webhook-Secret: <secret>
+```
+
+Do not commit real secrets to Git.
 
 ## Roadmap
 
 - v0.1.0 — Lead intake foundation ✅
 - v0.2.0 — AI qualification ✅
 - v0.3.0 — Explainable lead scoring ✅
-- v0.4.0 — n8n / Telegram / follow-up automation
+- v0.4.0 — n8n / Telegram / follow-up automation ✅
 - v0.5.0 — Reliability, audit and demo
 - v1.0.0 — Portfolio release

@@ -26,6 +26,7 @@ def create(
     lead_tier: str,
     recommended_action: str,
     score_reasons: str,
+    followup_draft: str,
 ) -> Lead:
     lead = Lead(
         name=name,
@@ -43,7 +44,25 @@ def create(
         lead_tier=lead_tier,
         recommended_action=recommended_action,
         score_reasons=score_reasons,
+        followup_draft=followup_draft,
     )
+    db.add(lead)
+    db.commit()
+    db.refresh(lead)
+    return lead
+
+
+def update_automation_result(
+    db: Session,
+    lead: Lead,
+    *,
+    status: str,
+    attempts: int,
+    last_error: str,
+) -> Lead:
+    lead.automation_status = status
+    lead.automation_attempts = attempts
+    lead.automation_last_error = last_error
     db.add(lead)
     db.commit()
     db.refresh(lead)

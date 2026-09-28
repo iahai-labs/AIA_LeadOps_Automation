@@ -29,6 +29,11 @@ class Lead(Base):
     recommended_action: Mapped[str] = mapped_column(String(160), default="")
     score_reasons: Mapped[str] = mapped_column(Text, default="[]")
 
+    followup_draft: Mapped[str] = mapped_column(Text, default="")
+    automation_status: Mapped[str] = mapped_column(String(24), default="pending")
+    automation_attempts: Mapped[int] = mapped_column(Integer, default=0)
+    automation_last_error: Mapped[str] = mapped_column(Text, default="")
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(UTC),
