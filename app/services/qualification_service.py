@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from app.core.config import settings
 from app.integrations.llm import LLMProvider, OpenAICompatibleProvider
 from app.schemas.lead import LeadCreate, LeadQualification
 
@@ -69,10 +70,22 @@ def _fallback_qualification(payload: LeadCreate) -> QualificationResult:
     if any(token in lowered for token in ("need", "want", "looking for", "quote", "proposal")):
         intent = "high"
 
+    service_type = "unknown"
+    service_tokens = {
+        "website_development": ("website", "web site", "landing page"),
+        "automation": ("automation", "workflow", "n8n", "automate"),
+        "ai_assistant": ("ai assistant", "chatbot", "knowledge assistant"),
+        "seo": ("seo", "search engine"),
+    }
+    for candidate, tokens in service_tokens.items():
+        if any(token in lowered for token in tokens):
+            service_type = candidate
+            break
+
     language = "en" if message.isascii() else "unknown"
 
     return QualificationResult(
-        service_type="unknown",
+        service_type=service_type,
         intent=intent,
         urgency=urgency,
         summary=message[:240],
@@ -85,6 +98,9 @@ def qualify_lead(
     payload: LeadCreate,
     provider: LLMProvider | None = None,
 ) -> QualificationResult:
+    if settings.demo_mode and settings.demo_disable_external_ai:
+        return _fallback_qualification(payload)
+
     provider = provider or OpenAICompatibleProvider()
 
     user_prompt = (
@@ -117,7 +133,5 @@ def qualify_lead(
             ).lower(),
             source="ai",
         )
-    except (RuntimeError, ValueError, KeyError, TypeError):
-        return _fallback_qualification(payload)
     except Exception:
         return _fallback_qualification(payload)

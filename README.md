@@ -4,83 +4,82 @@
 
 Production-minded AI lead operations and workflow automation for SMBs.
 
-## Interactive demo UI
+## Live demo
 
-The repository now includes a lightweight, responsive demo interface at:
+Production-safe public deployment target:
 
-```text
-http://127.0.0.1:8000/
-```
+`https://ai.iradhd.ir/leadops/`
 
-The UI demonstrates the end-to-end workflow:
+The public demo runs in a cost-safe mode:
+- interactive lead processing remains available
+- deterministic qualification fallback is used
+- external AI calls are disabled
+- external n8n delivery is disabled
+- POST requests are rate limited
+
+The codebase still supports real OpenAI-compatible AI providers and n8n automation when
+enabled through private environment configuration.
+
+## Workflow
 
 ```text
 Lead Intake
-  -> AI Qualification
-  -> Explainable Lead Scoring
+  -> Qualification
+  -> Explainable Scoring
   -> Recommended Action
   -> Follow-up Draft
-  -> Automation Status
+  -> Persistence
+  -> Automation Boundary
   -> Audit Trail
 ```
 
-Built-in demo presets include:
-- Hot lead
-- Cold lead
-- Duplicate submission
-
-The UI is intentionally dependency-light and is served directly by FastAPI, keeping the
-portfolio demo easy to run and deploy.
-
-## Run locally
-
-```bash
-uvicorn app.main:app --reload
-```
-
-Then open:
-
-```text
-http://127.0.0.1:8000/
-```
-
-Interactive API documentation remains available at:
-
-```text
-http://127.0.0.1:8000/docs
-```
-
-## Engineering highlights
+## Portfolio highlights
 
 - FastAPI REST API
 - PostgreSQL persistence
 - deterministic duplicate detection
 - structured AI qualification
 - OpenAI-compatible provider abstraction
-- safe AI fallback
+- safe fallback behavior
 - explainable 0–100 lead scoring
-- hot / warm / cold lead tiers
-- recommended next action
-- follow-up draft generation
-- n8n outbound webhook integration
-- webhook secret support
-- bounded retry policy
-- automation status tracking
+- hot / warm / cold tiers
+- follow-up generation
+- n8n integration boundary
+- bounded retry behavior
+- automation state persistence
 - audit trail
-- responsive recruiter-friendly demo UI
-- Docker Compose
-- pytest
-- Ruff
+- responsive interactive demo UI
+- demo-safe rate limiting
+- Docker production deployment
 - GitHub Actions CI
+- pytest + Ruff
 - Dependabot and repository security controls
 
-## Architecture
+## Local demo
 
-See [`docs/architecture.md`](docs/architecture.md).
+```bash
+uvicorn app.main:app --reload --port 8002
+```
 
-## Portfolio case study
+Open:
 
-See [`docs/portfolio-case-study.md`](docs/portfolio-case-study.md).
+`http://127.0.0.1:8002/`
+
+## API docs
+
+Local:
+
+`http://127.0.0.1:8002/docs`
+
+Public deployment:
+
+`https://ai.iradhd.ir/leadops/docs`
+
+## Documentation
+
+- [`docs/architecture.md`](docs/architecture.md)
+- [`docs/portfolio-case-study.md`](docs/portfolio-case-study.md)
+- [`docs/phase-8/DEPLOYMENT.md`](docs/phase-8/DEPLOYMENT.md)
 
 ## Release path
 
@@ -90,4 +89,5 @@ See [`docs/portfolio-case-study.md`](docs/portfolio-case-study.md).
 - `v0.4.0` — Automation integrations
 - `v0.5.0` — Reliability, audit, and demo endpoints
 - Demo UI — portfolio presentation layer
-- `v1.0.0` — final live portfolio release after production-safe deployment
+- Production-safe deployment — `/leadops/`
+- `v1.0.0` — final portfolio release after live verification

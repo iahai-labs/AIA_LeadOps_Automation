@@ -1,3 +1,4 @@
+from app.core.config import settings
 from app.integrations.n8n import WebhookResult, send_lead_webhook
 from app.schemas.lead import LeadCreate
 from app.services.qualification_service import QualificationResult
@@ -50,6 +51,9 @@ def dispatch_lead_automation(
     scoring: ScoringResult,
     followup_draft: str,
 ) -> WebhookResult:
+    if settings.demo_mode and settings.demo_disable_external_automation:
+        return WebhookResult(status="skipped", attempts=0)
+
     webhook_payload = build_automation_payload(
         lead_id=lead_id,
         payload=payload,
