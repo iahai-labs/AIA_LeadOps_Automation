@@ -1,3 +1,5 @@
+name: aia-leadops
+
 services:
   api:
     build:
@@ -10,6 +12,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    entrypoint: ["/app/docker/entrypoint.prod.sh"]
     healthcheck:
       test:
         [

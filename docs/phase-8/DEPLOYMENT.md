@@ -23,6 +23,15 @@ Internet
 The application port is bound only to loopback and is not exposed directly to the public
 internet.
 
+## Database bootstrap
+
+The production API container runs `python -m app.db.init_db` before Uvicorn starts.
+For this portfolio deployment, the production database is created from a fresh volume,
+so SQLAlchemy metadata initialization provides a deterministic first bootstrap.
+
+Future schema changes should move to explicit versioned migrations before upgrading an
+existing production database.
+
 ## Demo-safe mode
 
 The public portfolio deployment is intended to run with:
@@ -34,17 +43,18 @@ The public portfolio deployment is intended to run with:
 
 This keeps the demo interactive while avoiding uncontrolled API cost or automation abuse.
 
-The production-capable AI and n8n integration remain in the codebase and can be enabled
-through environment configuration for a private/customer deployment.
+## Compose environment
+
+Run production Compose with:
+
+```text
+docker compose --env-file .env.production -f docker-compose.prod.yml ...
+```
+
+The explicit `--env-file` is required because Compose uses `LEADOPS_DB_PASSWORD` while
+rendering the database service configuration.
 
 ## Subpath support
 
 `APP_ROOT_PATH=/leadops` ensures FastAPI-generated URLs such as OpenAPI documentation work
 correctly behind the `/leadops/` reverse-proxy path.
-
-## Files
-
-- `docker-compose.prod.yml` — production container topology
-- `.env.production.example` — production environment template
-- `deploy/nginx/leadops.location.conf` — Nginx location block for the existing portfolio
-  server
