@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="AIA LeadOps Automation live portfolio demo">
+  <title>AIA LeadOps Automation — Live Demo</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b1020;
+      --surface: #11182a;
+      --surface-2: #172238;
+      --text: #e8eef9;
+      --muted: #9eabc0;
+      --line: #273550;
+      --accent: #7dd3fc;
+      --good: #86efac;
+      --warn: #fde68a;
+      --bad: #fca5a5;
+      --shadow: 0 20px 60px rgba(0,0,0,.28);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 20% 0%, rgba(125,211,252,.08), transparent 35%),
+        var(--bg);
+      color: var(--text);
+    }
+    a { color: var(--accent); }
+    .shell { width: min(1180px, calc(100% - 32px)); margin: 0 auto; }
+    header {
+      padding: 56px 0 30px;
+      border-bottom: 1px solid var(--line);
+    }
+    .eyebrow {
+      display: inline-flex; gap: 8px; align-items: center;
+      color: var(--accent); font-size: 13px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    h1 { font-size: clamp(34px, 6vw, 64px); line-height: 1; margin: 14px 0 18px; letter-spacing: -.04em; }
+    .lead { max-width: 760px; color: var(--muted); font-size: 18px; line-height: 1.65; }
+    .flow {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px;
+      color: var(--muted); font-size: 13px;
+    }
+    .flow span { border: 1px solid var(--line); border-radius: 999px; padding: 7px 10px; background: rgba(255,255,255,.02); }
+    main { padding: 30px 0 60px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 24px; }
+    .card {
+      background: rgba(17,24,42,.92);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }
+    .card h2 { margin: 0 0 6px; font-size: 20px; }
+    .sub { color: var(--muted); font-size: 14px; margin-bottom: 18px; }
+    .presets { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+    button {
+      border: 1px solid var(--line); background: var(--surface-2); color: var(--text);
+      border-radius: 10px; padding: 10px 13px; font-weight: 700; cursor: pointer;
+    }
+    button:hover { border-color: var(--accent); }
+    button.primary { width: 100%; background: var(--accent); color: #07111c; border-color: transparent; padding: 13px; margin-top: 8px; }
+    button:disabled { opacity: .55; cursor: wait; }
+    label { display: block; font-size: 13px; color: var(--muted); margin: 13px 0 6px; }
+    input, textarea {
+      width: 100%; background: #0d1423; color: var(--text); border: 1px solid var(--line);
+      border-radius: 10px; padding: 11px 12px; outline: none;
+    }
+    input:focus, textarea:focus { border-color: var(--accent); }
+    textarea { min-height: 135px; resize: vertical; }
+    .result-empty { color: var(--muted); min-height: 420px; display: grid; place-items: center; text-align: center; padding: 40px; }
+    .hidden { display: none !important; }
+    .topline { display: flex; justify-content: space-between; gap: 12px; align-items: start; margin-bottom: 18px; }
+    .pill {
+      display: inline-flex; align-items: center; border-radius: 999px; padding: 7px 10px;
+      font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em;
+      border: 1px solid var(--line);
+    }
+    .hot { color: var(--bad); border-color: rgba(252,165,165,.4); }
+    .warm { color: var(--warn); border-color: rgba(253,230,138,.4); }
+    .cold { color: var(--good); border-color: rgba(134,239,172,.4); }
+    .score { font-size: 48px; font-weight: 800; letter-spacing: -.04em; }
+    .muted { color: var(--muted); }
+    .grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .metric { padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: #0d1423; }
+    .metric small { display: block; color: var(--muted); margin-bottom: 7px; }
+    .metric strong { font-size: 15px; }
+    .section { border-top: 1px solid var(--line); margin-top: 18px; padding-top: 18px; }
+    .section h3 { margin: 0 0 10px; font-size: 15px; }
+    .draft {
+      white-space: pre-wrap; background: #0d1423; border: 1px solid var(--line);
+      border-radius: 12px; padding: 14px; color: #dbe6f5; line-height: 1.55; font-size: 14px;
+    }
+    .timeline { display: grid; gap: 10px; }
+    .event { display: grid; grid-template-columns: 10px 1fr; gap: 10px; align-items: start; }
+    .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); margin-top: 6px; }
+    .event strong { font-size: 13px; }
+    .event div div { color: var(--muted); font-size: 12px; margin-top: 3px; word-break: break-word; }
+    .statusline { font-size: 13px; color: var(--muted); margin-top: 12px; min-height: 20px; }
+    footer { border-top: 1px solid var(--line); padding: 24px 0 40px; color: var(--muted); font-size: 13px; }
+    @media (max-width: 860px) {
+      main { grid-template-columns: 1fr; }
+      header { padding-top: 34px; }
+    }
+    @media (max-width: 520px) {
+      .shell { width: min(100% - 20px, 1180px); }
+      .card { padding: 16px; border-radius: 14px; }
+      .grid2 { grid-template-columns: 1fr; }
+      .topline { align-items: center; }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="shell">
+    <div class="eyebrow">AIA Portfolio · Live Demo</div>
+    <h1>LeadOps Automation</h1>
+    <div class="lead">
+      Turn an inbound business lead into structured qualification, explainable scoring,
+      a recommended action, a follow-up draft, and an auditable automation workflow.
+    </div>
+    <div class="flow">
+      <span>Lead Intake</span><span>AI Qualification</span><span>Scoring</span>
+      <span>Follow-up</span><span>n8n</span><span>Audit</span>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+  <main>
+    <section class="card">
+      <h2>Try a lead</h2>
+      <div class="sub">Use a preset or enter your own sample. No real customer data is required.</div>
+
+      <div class="presets">
+        <button type="button" data-preset="hot">Hot lead</button>
+        <button type="button" data-preset="cold">Cold lead</button>
+        <button type="button" data-preset="duplicate">Duplicate demo</button>
+      </div>
+
+      <form id="lead-form">
+        <label for="name">Name</label>
+        <input id="name" required maxlength="120">
+
+        <label for="email">Email</label>
+        <input id="email" required type="email">
+
+        <label for="company">Company</label>
+        <input id="company" maxlength="160">
+
+        <label for="message">Message</label>
+        <textarea id="message" required maxlength="5000"></textarea>
+
+        <button class="primary" id="submit-btn" type="submit">Analyze lead</button>
+        <div class="statusline" id="statusline" aria-live="polite"></div>
+      </form>
+    </section>
+
+    <section class="card">
+      <div id="empty" class="result-empty">
+        Submit a sample lead to see the full decision trail.
+      </div>
+
+      <div id="result" class="hidden">
+        <div class="topline">
+          <div>
+            <div class="muted">Lead score</div>
+            <div class="score"><span id="score">—</span><span class="muted" style="font-size:18px"> / 100</span></div>
+          </div>
+          <div id="tier" class="pill">—</div>
+        </div>
+
+        <div class="grid2">
+          <div class="metric"><small>Service</small><strong id="service">—</strong></div>
+          <div class="metric"><small>Intent</small><strong id="intent">—</strong></div>
+          <div class="metric"><small>Urgency</small><strong id="urgency">—</strong></div>
+          <div class="metric"><small>Automation</small><strong id="automation">—</strong></div>
+        </div>
+
+        <div class="section">
+          <h3>Recommended action</h3>
+          <div id="action" class="draft"></div>
+        </div>
+
+        <div class="section">
+          <h3>Qualification summary</h3>
+          <div id="summary" class="draft"></div>
+        </div>
+
+        <div class="section">
+          <h3>Follow-up draft</h3>
+          <div id="draft" class="draft"></div>
+        </div>
+
+        <div class="section">
+          <h3>Audit trail</h3>
+          <div id="timeline" class="timeline"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<footer>
+  <div class="shell">
+    Portfolio demo for AIA LeadOps Automation · FastAPI · PostgreSQL · AI · n8n · CI
+  </div>
+</footer>
+
+<script>
+  const presets = {
+    hot: {
+      name: "Sarah Miller",
+      email: "sarah@example.com",
+      company: "Bright Dental",
+      message: "We need a new website for our dental clinic and want to launch next month. Please send a proposal."
+    },
+    cold: {
+      name: "Alex Smith",
+      email: "alex@example.com",
+      company: "",
+      message: "Just checking prices for now."
+    },
+    duplicate: {
+      name: "Demo Repeat",
+      email: "repeat@example.com",
+      company: "Repeat Co",
+      message: "We need a website next month. This preset can be submitted twice to demonstrate duplicate detection."
+    }
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const form = $("lead-form");
+  const submitButton = $("submit-btn");
+  const statusline = $("statusline");
+
+  document.querySelectorAll("[data-preset]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const preset = presets[button.dataset.preset];
+      $("name").value = preset.name;
+      $("email").value = preset.email;
+      $("company").value = preset.company;
+      $("message").value = preset.message;
+      statusline.textContent = "Preset loaded.";
+    });
+  });
+
+  function prettyLabel(value) {
+    return String(value || "unknown").replaceAll("_", " ");
+  }
+
+  function setText(id, value) {
+    $(id).textContent = value == null ? "—" : String(value);
+  }
+
+  function renderTimeline(events) {
+    const timeline = $("timeline");
+    timeline.replaceChildren();
+
+    if (!events.length) {
+      const empty = document.createElement("div");
+      empty.className = "muted";
+      empty.textContent = "No audit events available.";
+      timeline.appendChild(empty);
+      return;
+    }
+
+    for (const event of events) {
+      const row = document.createElement("div");
+      row.className = "event";
+
+      const dot = document.createElement("div");
+      dot.className = "dot";
+
+      const body = document.createElement("div");
+      const title = document.createElement("strong");
+      title.textContent = event.event_type;
+
+      const detail = document.createElement("div");
+      detail.textContent = JSON.stringify(event.event_data);
+
+      body.append(title, detail);
+      row.append(dot, body);
+      timeline.appendChild(row);
+    }
+  }
+
+  async function loadAudit(leadId) {
+    const response = await fetch(`api/v1/leads/${leadId}/audit`);
+    if (!response.ok) return [];
+    const data = await response.json();
+    return data.events || [];
+  }
+
+  async function submitLead(event) {
+    event.preventDefault();
+    submitButton.disabled = true;
+    statusline.textContent = "Analyzing lead…";
+
+    const payload = {
+      name: $("name").value.trim(),
+      email: $("email").value.trim(),
+      company: $("company").value.trim() || null,
+      message: $("message").value.trim()
+    };
+
+    try {
+      const response = await fetch("api/v1/leads", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.detail ? JSON.stringify(data.detail) : "Request failed");
+      }
+
+      const events = await loadAudit(data.id);
+
+      $("empty").classList.add("hidden");
+      $("result").classList.remove("hidden");
+
+      setText("score", data.scoring.score);
+      setText("service", prettyLabel(data.qualification.service_type));
+      setText("intent", data.qualification.intent);
+      setText("urgency", data.qualification.urgency);
+      setText("automation", data.automation.status);
+      setText("action", data.scoring.recommended_action);
+      setText("summary", data.qualification.summary);
+      setText("draft", data.automation.followup_draft);
+
+      const tier = $("tier");
+      tier.textContent = data.scoring.tier;
+      tier.className = `pill ${data.scoring.tier}`;
+
+      renderTimeline(events);
+
+      statusline.textContent = data.duplicate
+        ? `Duplicate detected — existing lead #${data.id} returned.`
+        : `Lead #${data.id} processed successfully.`;
+    } catch (error) {
+      statusline.textContent = `Error: ${error.message}`;
+    } finally {
+      submitButton.disabled = false;
+    }
+  }
+
+  form.addEventListener("submit", submitLead);
+  document.querySelector('[data-preset="hot"]').click();
+</script>
+</body>
+</html>
