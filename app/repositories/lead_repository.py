@@ -22,6 +22,10 @@ def create(
     qualification_summary: str,
     language: str,
     qualification_source: str,
+    lead_score: int,
+    lead_tier: str,
+    recommended_action: str,
+    score_reasons: str,
 ) -> Lead:
     lead = Lead(
         name=name,
@@ -35,6 +39,10 @@ def create(
         qualification_summary=qualification_summary,
         language=language,
         qualification_source=qualification_source,
+        lead_score=lead_score,
+        lead_tier=lead_tier,
+        recommended_action=recommended_action,
+        score_reasons=score_reasons,
     )
     db.add(lead)
     db.commit()

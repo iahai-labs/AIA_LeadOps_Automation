@@ -17,8 +17,16 @@ class LeadQualification(BaseModel):
     source: str
 
 
+class LeadScoring(BaseModel):
+    score: int = Field(ge=0, le=100)
+    tier: str
+    recommended_action: str
+    reasons: list[str]
+
+
 class LeadResponse(BaseModel):
     id: int
     status: str
     duplicate: bool
     qualification: LeadQualification
+    scoring: LeadScoring

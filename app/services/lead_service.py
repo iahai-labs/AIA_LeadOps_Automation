@@ -1,10 +1,12 @@
+import json
 from hashlib import sha256
 
 from sqlalchemy.orm import Session
 
 from app.repositories.lead_repository import create, get_by_fingerprint
-from app.schemas.lead import LeadCreate, LeadQualification, LeadResponse
+from app.schemas.lead import LeadCreate, LeadQualification, LeadResponse, LeadScoring
 from app.services.qualification_service import qualify_lead
+from app.services.scoring_service import score_lead
 
 
 def _fingerprint(payload: LeadCreate) -> str:
@@ -29,6 +31,23 @@ def _qualification_from_existing(lead: object) -> LeadQualification:
     )
 
 
+def _scoring_from_existing(lead: object) -> LeadScoring:
+    try:
+        reasons = json.loads(lead.score_reasons)
+    except (TypeError, json.JSONDecodeError):
+        reasons = []
+
+    if not isinstance(reasons, list):
+        reasons = []
+
+    return LeadScoring(
+        score=lead.lead_score,
+        tier=lead.lead_tier,
+        recommended_action=lead.recommended_action,
+        reasons=[str(reason) for reason in reasons],
+    )
+
+
 def create_lead(db: Session, payload: LeadCreate) -> LeadResponse:
     fingerprint = _fingerprint(payload)
     existing = get_by_fingerprint(db, fingerprint)
@@ -39,9 +58,11 @@ def create_lead(db: Session, payload: LeadCreate) -> LeadResponse:
             status=existing.status,
             duplicate=True,
             qualification=_qualification_from_existing(existing),
+            scoring=_scoring_from_existing(existing),
         )
 
     qualification = qualify_lead(payload)
+    scoring = score_lead(payload, qualification)
 
     lead = create(
         db,
@@ -56,6 +77,10 @@ def create_lead(db: Session, payload: LeadCreate) -> LeadResponse:
         qualification_summary=qualification.summary,
         language=qualification.language,
         qualification_source=qualification.source,
+        lead_score=scoring.score,
+        lead_tier=scoring.tier,
+        recommended_action=scoring.recommended_action,
+        score_reasons=json.dumps(scoring.reasons),
     )
 
     return LeadResponse(
@@ -63,4 +88,5 @@ def create_lead(db: Session, payload: LeadCreate) -> LeadResponse:
         status=lead.status,
         duplicate=False,
         qualification=qualification.to_schema(),
+        scoring=scoring.to_schema(),
     )

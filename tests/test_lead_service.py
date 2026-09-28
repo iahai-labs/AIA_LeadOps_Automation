@@ -23,6 +23,11 @@ def test_create_lead_and_detect_duplicate() -> None:
 
     assert first.duplicate is False
     assert first.qualification.source in {"ai", "fallback"}
+    assert first.scoring.score >= 0
+    assert first.scoring.tier in {"cold", "warm", "hot"}
+
     assert second.duplicate is True
     assert first.id == second.id
     assert second.qualification.service_type == first.qualification.service_type
+    assert second.scoring.score == first.scoring.score
+    assert second.scoring.reasons == first.scoring.reasons
