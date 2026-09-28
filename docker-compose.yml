@@ -1,0 +1,25 @@
+services:
+  api:
+    build: .
+    environment:
+      DATABASE_URL: postgresql+psycopg://leadops:leadops@db:5432/leadops
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: leadops
+      POSTGRES_USER: leadops
+      POSTGRES_PASSWORD: leadops
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U leadops -d leadops"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    volumes:
+      - leadops_pgdata:/var/lib/postgresql/data
+volumes:
+  leadops_pgdata:
