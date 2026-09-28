@@ -6,15 +6,18 @@ from sqlalchemy.orm import Session
 from app.repositories.lead_repository import (
     create,
     get_by_fingerprint,
+    get_by_id,
     update_automation_result,
 )
 from app.schemas.lead import (
     LeadAutomation,
     LeadCreate,
+    LeadDetailResponse,
     LeadQualification,
     LeadResponse,
     LeadScoring,
 )
+from app.services.audit_service import audit
 from app.services.automation_service import dispatch_lead_automation
 from app.services.followup_service import build_followup_draft
 from app.services.qualification_service import qualify_lead
@@ -69,11 +72,36 @@ def _automation_from_existing(lead: object) -> LeadAutomation:
     )
 
 
+def get_lead_detail(db: Session, lead_id: int) -> LeadDetailResponse | None:
+    lead = get_by_id(db, lead_id)
+    if lead is None:
+        return None
+
+    return LeadDetailResponse(
+        id=lead.id,
+        status=lead.status,
+        duplicate=False,
+        name=lead.name,
+        email=lead.email,
+        company=lead.company,
+        message=lead.message,
+        qualification=_qualification_from_existing(lead),
+        scoring=_scoring_from_existing(lead),
+        automation=_automation_from_existing(lead),
+    )
+
+
 def create_lead(db: Session, payload: LeadCreate) -> LeadResponse:
     fingerprint = _fingerprint(payload)
     existing = get_by_fingerprint(db, fingerprint)
 
     if existing is not None:
+        audit(
+            db,
+            lead_id=existing.id,
+            event_type="lead.duplicate_detected",
+            payload={"fingerprint": fingerprint},
+        )
         return LeadResponse(
             id=existing.id,
             status=existing.status,
@@ -107,6 +135,17 @@ def create_lead(db: Session, payload: LeadCreate) -> LeadResponse:
         followup_draft=followup_draft,
     )
 
+    audit(
+        db,
+        lead_id=lead.id,
+        event_type="lead.created",
+        payload={
+            "qualification_source": qualification.source,
+            "lead_score": scoring.score,
+            "lead_tier": scoring.tier,
+        },
+    )
+
     automation_result = dispatch_lead_automation(
         lead_id=lead.id,
         payload=payload,
@@ -121,6 +160,16 @@ def create_lead(db: Session, payload: LeadCreate) -> LeadResponse:
         status=automation_result.status,
         attempts=automation_result.attempts,
         last_error=automation_result.last_error,
+    )
+
+    audit(
+        db,
+        lead_id=lead.id,
+        event_type=f"automation.{automation_result.status}",
+        payload={
+            "attempts": automation_result.attempts,
+            "last_error": automation_result.last_error,
+        },
     )
 
     return LeadResponse(

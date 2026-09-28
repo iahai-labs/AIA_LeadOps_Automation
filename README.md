@@ -2,75 +2,94 @@
 
 Production-minded AI lead operations and workflow automation for SMBs.
 
-## Current release: v0.4.0 — Automation Integrations
+## Current release: v0.5.0 — Reliability, Audit & Demo
 
 ### Implemented
 - FastAPI lead intake API
 - PostgreSQL persistence
 - duplicate detection
-- structured AI lead qualification
-- provider abstraction for OpenAI-compatible APIs
-- safe deterministic AI fallback
+- structured AI qualification
+- safe AI fallback
 - explainable deterministic lead scoring
-- hot / warm / cold lead tiers
-- recommended next action
-- deterministic follow-up draft generation
+- follow-up draft generation
 - outbound n8n webhook integration
-- optional webhook secret header
-- Telegram recommendation flag for hot leads
-- integration status / attempt / error persistence
+- bounded webhook retry policy
+- automation status / attempts / error persistence
+- audit trail for lead and automation events
+- lead detail endpoint
+- lead audit endpoint
 - pytest + Ruff
 - GitHub Actions CI
 - Dependabot
 - Docker Compose
 
-## Automation flow
+## Reliability behavior
 
-```text
-Lead API
-  -> AI qualification
-  -> deterministic scoring
-  -> follow-up draft
-  -> persist lead
-  -> n8n webhook
-  -> Telegram / CRM / email workflow
-```
+Webhook delivery is intentionally non-blocking for the business flow:
+- lead creation succeeds even if n8n is unavailable
+- delivery is retried up to a bounded maximum
+- final automation state is persisted
+- errors are stored for diagnosis
+- audit events record what happened
 
-The application does not require n8n to accept leads. If no webhook is configured,
-automation delivery is marked as `skipped`. If delivery fails, lead creation remains
-successful and the integration result is stored for later inspection.
+## Demo API
 
-## Webhook payload
+### Create lead
 
-The n8n webhook receives:
-- lead identity and message
-- structured qualification
-- explainable scoring
-- recommended action
+`POST /api/v1/leads`
+
+### Inspect lead
+
+`GET /api/v1/leads/{lead_id}`
+
+### Inspect audit trail
+
+`GET /api/v1/leads/{lead_id}/audit`
+
+## Suggested demo scenarios
+
+### 1. Hot lead
+Use a detailed, urgent request with a clear timeline.
+
+Expected:
+- high qualification signals
+- hot score tier
+- urgent recommended action
+- Telegram recommendation flag
 - follow-up draft
-- `telegram_recommended=true` for hot leads
+- audit events
 
-## Environment
+### 2. Low-signal lead
+Use a short price inquiry with no timeline.
 
-```text
-N8N_WEBHOOK_URL=https://your-n8n.example/webhook/leadops
-N8N_WEBHOOK_SECRET=replace-with-a-secret
-AUTOMATION_TIMEOUT_SECONDS=5
-```
+Expected:
+- lower score
+- cold tier
+- nurture follow-up recommendation
 
-When a secret is configured it is sent as:
+### 3. Duplicate lead
+Submit the same payload twice.
 
-```text
-X-AIA-Webhook-Secret: <secret>
-```
+Expected:
+- same lead ID
+- `duplicate=true`
+- duplicate audit event
 
-Do not commit real secrets to Git.
+### 4. n8n unavailable
+Configure an unreachable webhook.
+
+Expected:
+- lead still created
+- bounded retries
+- automation status `failed`
+- attempts and error persisted
+- audit event records failure
 
 ## Roadmap
 
 - v0.1.0 — Lead intake foundation ✅
 - v0.2.0 — AI qualification ✅
 - v0.3.0 — Explainable lead scoring ✅
-- v0.4.0 — n8n / Telegram / follow-up automation ✅
-- v0.5.0 — Reliability, audit and demo
-- v1.0.0 — Portfolio release
+- v0.4.0 — Automation integrations ✅
+- v0.5.0 — Reliability, audit and demo ✅
+- v1.0.0 — Portfolio hardening and release

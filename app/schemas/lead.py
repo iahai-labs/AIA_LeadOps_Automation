@@ -38,3 +38,21 @@ class LeadResponse(BaseModel):
     qualification: LeadQualification
     scoring: LeadScoring
     automation: LeadAutomation
+
+
+class LeadDetailResponse(LeadResponse):
+    name: str
+    email: EmailStr
+    company: str | None
+    message: str
+
+
+class LeadAuditEvent(BaseModel):
+    id: int
+    event_type: str
+    event_data: dict[str, object]
+
+
+class LeadAuditResponse(BaseModel):
+    lead_id: int
+    events: list[LeadAuditEvent]

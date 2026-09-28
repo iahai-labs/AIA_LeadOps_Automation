@@ -4,6 +4,10 @@ from sqlalchemy.orm import Session
 from app.models.lead import Lead
 
 
+def get_by_id(db: Session, lead_id: int) -> Lead | None:
+    return db.get(Lead, lead_id)
+
+
 def get_by_fingerprint(db: Session, fingerprint: str) -> Lead | None:
     return db.scalar(select(Lead).where(Lead.fingerprint == fingerprint))
 

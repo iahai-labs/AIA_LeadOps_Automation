@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 from dataclasses import dataclass
 
 import httpx
@@ -22,18 +23,26 @@ def send_lead_webhook(payload: dict[str, object]) -> WebhookResult:
     if settings.n8n_webhook_secret:
         headers["X-AIA-Webhook-Secret"] = settings.n8n_webhook_secret
 
-    try:
-        with httpx.Client(timeout=settings.automation_timeout_seconds) as client:
-            response = client.post(
-                settings.n8n_webhook_url,
-                json=payload,
-                headers=headers,
-            )
-            response.raise_for_status()
-        return WebhookResult(status="sent", attempts=1)
-    except httpx.HTTPError as exc:
-        return WebhookResult(
-            status="failed",
-            attempts=1,
-            last_error=str(exc)[:500],
-        )
+    last_error = ""
+    max_attempts = max(1, settings.automation_max_attempts)
+
+    for attempt in range(1, max_attempts + 1):
+        try:
+            with httpx.Client(timeout=settings.automation_timeout_seconds) as client:
+                response = client.post(
+                    settings.n8n_webhook_url,
+                    json=payload,
+                    headers=headers,
+                )
+                response.raise_for_status()
+            return WebhookResult(status="sent", attempts=attempt)
+        except httpx.HTTPError as exc:
+            last_error = str(exc)[:500]
+            if attempt < max_attempts:
+                time.sleep(settings.automation_retry_backoff_seconds)
+
+    return WebhookResult(
+        status="failed",
+        attempts=max_attempts,
+        last_error=last_error,
+    )
