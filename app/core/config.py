@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     app_name: str = "AIA LeadOps Automation"
-    app_version: str = "0.5.0"
+    app_version: str = "1.0.0"
     database_url: str = "postgresql+psycopg://leadops:leadops@db:5432/leadops"
 
     ai_provider: str = "openai-compatible"
