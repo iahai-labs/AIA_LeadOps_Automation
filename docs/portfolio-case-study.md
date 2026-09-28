@@ -1,84 +1,60 @@
-# Portfolio Case Study
+# AIA LeadOps Automation — Portfolio Case Study
 
 ## Problem
 
-SMBs often collect leads through forms but still process them manually. That creates
-slow response times, inconsistent prioritization, and weak visibility into what happened
-after a lead arrived.
+Small and medium businesses often receive inbound leads through forms, messages, or lightweight CRM workflows, but the operational follow-up is inconsistent. Leads may be duplicated, poorly qualified, manually prioritized, or lost before a timely response is sent.
 
 ## Constraints
 
-The system needed to:
-- use AI without depending on AI for core reliability
-- remain explainable to business users
-- avoid losing leads when an integration fails
-- support external automation tools such as n8n
-- be testable without calling paid external services
-- remain small enough to understand as a portfolio project
+The system needed to demonstrate practical AI automation without turning core business decisions into opaque LLM output.
+
+Key constraints included:
+
+- lead intake must continue even when AI is unavailable
+- automation failures must not lose customer data
+- duplicate submissions should be handled deterministically
+- prioritization should be explainable
+- external AI and automation integrations should remain replaceable
+- the public portfolio demo should not create uncontrolled API cost or automation abuse
+- the live application should coexist with the existing portfolio site without replacing its root
 
 ## Decisions
 
-### Structured qualification instead of free-form chat
-AI is used to extract bounded business signals rather than to control the whole workflow.
+### Structured qualification
+
+Lead messages are converted into structured fields such as service type, intent, urgency, language, and summary through an OpenAI-compatible provider abstraction.
 
 ### Deterministic scoring
-Lead scoring is explicit and testable. The model does not invent an opaque score.
 
-### Safe fallback
-Provider failure falls back to deterministic behavior so valid leads still enter the system.
+The LLM does not own the final lead score. Transparent business rules convert structured signals into a 0–100 score, a hot/warm/cold tier, reasons, and a recommended action.
 
-### Persist before automation
-The lead is committed before external workflow delivery. Integration failure therefore
-does not cause business-data loss.
+### Failure isolation
 
-### Audit trail
-Lead creation, duplicate detection, and automation outcomes are recorded as events.
+AI fallback, database persistence, and outbound automation are separated so one failed dependency does not destroy the entire workflow.
 
-### Provider and integration boundaries
-External dependencies are isolated behind dedicated modules so they can be replaced.
+### Auditable workflow
+
+Important lifecycle events are persisted as audit events, including lead creation, duplicate detection, and automation outcomes.
+
+### Production-safe public demo
+
+The public deployment runs with external AI and n8n execution disabled while retaining the production integration code. Rate limiting reduces abuse risk. The service is bound to VPS loopback and exposed through the existing Nginx portfolio reverse proxy.
 
 ## Result
 
-The final workflow demonstrates:
-- production-minded API design
-- AI integration
-- deterministic business rules
-- failure handling
-- workflow automation
-- persistence
-- auditability
-- automated testing
-- CI and repository security practices
+A deployed, interactive LeadOps system is available at:
 
-## Skills demonstrated
+`https://ai.iradhd.ir/leadops/`
 
-- Python
-- FastAPI
-- PostgreSQL
-- SQLAlchemy
-- Pydantic
-- REST APIs
-- LLM integrations
-- structured AI output
-- workflow automation
-- n8n integration
-- retry / failure handling
-- audit design
-- Docker
-- pytest
-- Ruff
-- GitHub Actions
-- dependency and repository security practices
+A visitor can submit a sample lead and observe:
 
-## Interview discussion points
+- structured qualification
+- explainable lead scoring
+- tier assignment
+- recommended response timing
+- follow-up draft generation
+- automation state
+- audit history
+- duplicate detection
 
-Useful questions this project can answer in an interview:
-
-- Why should AI qualification and lead scoring be separate?
-- How do you prevent an LLM outage from breaking lead intake?
-- Why persist before calling n8n?
-- How do bounded retries differ from infinite retries?
-- How does duplicate detection work?
-- Why store scoring reasons?
-- How would the webhook integration be made asynchronous at larger scale?
-- How would you add a CRM adapter without rewriting business logic?
+The result demonstrates an end-to-end business automation system rather than a standalone chatbot or static prototype.
