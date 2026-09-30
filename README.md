@@ -84,6 +84,15 @@ A deterministic SHA-256 fingerprint is used to detect repeated submissions and r
 
 The deployed portfolio demo keeps the real production integration boundaries in the codebase while disabling uncontrolled external AI and n8n calls. This allows recruiters and clients to interact with the system without creating API-cost or automation-abuse risk.
 
+## Dependency & Tooling Files
+
+The repository intentionally keeps both dependency and tooling configuration files:
+
+- `requirements.txt` — pinned runtime and development dependencies used for installation, local development, Docker builds, and CI.
+- `pyproject.toml` — project tooling configuration, including Ruff settings and other repository-level tool configuration.
+
+Keeping both files is intentional because they serve different responsibilities.
+
 ## Local Demo
 
 ```bash
@@ -136,6 +145,10 @@ python -m pytest -q
 ```
 
 CI runs automatically on pushes and pull requests.
+
+## License
+
+This project is licensed under the MIT License. See [`LICENSE`](LICENSE).
 
 ## Release History
 
